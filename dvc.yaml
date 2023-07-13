@@ -1,0 +1,44 @@
+stages:
+  extract:
+    cmd: unzip data/Posts.xml.zip -d data
+    deps:
+    - data/Posts.xml.zip
+    outs:
+    - data/Posts.xml
+  transform:
+    cmd: python3 code/xml_to_tsv.py data/Posts.tsv
+    deps:
+    - code/xml_to_tsv.py
+    - data/Posts.xml
+    outs:
+    - data/Posts.tsv
+  split:
+    cmd: python3 code/split_train_test.py 0.2 1234
+    deps:
+    - code/split_train_test.py
+    - data/Posts.tsv
+    outs:
+    - data/Posts-test.tsv
+    - data/Posts-train.tsv
+  featurize:
+    cmd: python3 code/featurization.py
+    deps:
+    - code/featurization.py
+    - data/Posts-test.tsv
+    - data/Posts-train.tsv
+    outs:
+    - data/matrix-test.pkl
+    - data/matrix-train.pkl
+  train:
+    cmd: python3 code/train_model.py 1234
+    deps:
+    - code/train_model.py
+    - data/matrix-train.pkl
+    outs:
+    - data/model.pkl
+  evaluate:
+    cmd: python3 code/evaluate.py
+    deps:
+    - code/evaluate.py
+    - data/matrix-test.pkl
+    - data/model.pkl

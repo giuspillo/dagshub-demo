@@ -1,1 +1,8 @@
 /Posts.xml.zip
+/Posts.xml
+/Posts.tsv
+/Posts-test.tsv
+/Posts-train.tsv
+/matrix-test.pkl
+/matrix-train.pkl
+/model.pkl

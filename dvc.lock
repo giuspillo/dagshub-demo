@@ -1,0 +1,85 @@
+schema: '2.0'
+stages:
+  extract:
+    cmd: unzip data/Posts.xml.zip -d data
+    deps:
+    - path: data/Posts.xml.zip
+      md5: ce68b98d82545628782c66192c96f2d2
+      size: 10567868
+    outs:
+    - path: data/Posts.xml
+      md5: a304afb96060aad90176268345e10355
+      size: 37916850
+  transform:
+    cmd: python3 code/xml_to_tsv.py data/Posts.tsv
+    deps:
+    - path: code/xml_to_tsv.py
+      md5: b491d6c7358c04f0fdad70302a23d2cb
+      size: 1440
+    - path: data/Posts.xml
+      md5: a304afb96060aad90176268345e10355
+      size: 37916850
+    outs:
+    - path: data/Posts.tsv
+      md5: f64d65d4ccef9ff9d37ea4cf70b18700
+      size: 25654203
+  split:
+    cmd: python3 code/split_train_test.py 0.2 1234
+    deps:
+    - path: code/split_train_test.py
+      md5: bd1d6c2f35e7d1e49d3c231692f87aa2
+      size: 1860
+    - path: data/Posts.tsv
+      md5: f64d65d4ccef9ff9d37ea4cf70b18700
+      size: 25654203
+    outs:
+    - path: data/Posts-test.tsv
+      md5: abd901643c99915bbbb148d021bfa57c
+      size: 5007173
+    - path: data/Posts-train.tsv
+      md5: 4dda2b90e1af168600d785aad80d5391
+      size: 20878710
+  featurize:
+    cmd: python3 code/featurization.py
+    deps:
+    - path: code/featurization.py
+      md5: aa48e249c9b179d14aa5b6e30f26f835
+      size: 2130
+    - path: data/Posts-test.tsv
+      md5: abd901643c99915bbbb148d021bfa57c
+      size: 5007173
+    - path: data/Posts-train.tsv
+      md5: 4dda2b90e1af168600d785aad80d5391
+      size: 20878710
+    outs:
+    - path: data/matrix-test.pkl
+      md5: dafc0eb8b3806252d6bfe4678e2b5204
+      size: 2272922
+    - path: data/matrix-train.pkl
+      md5: af3da1ce67cde348e3171c0921f5086f
+      size: 9248499
+  train:
+    cmd: python3 code/train_model.py 1234
+    deps:
+    - path: code/train_model.py
+      md5: 17b37113a7a12afcd9c64db6f482c555
+      size: 912
+    - path: data/matrix-train.pkl
+      md5: af3da1ce67cde348e3171c0921f5086f
+      size: 9248499
+    outs:
+    - path: data/model.pkl
+      md5: d3c804483850f1c3580b9d8d0ddf7550
+      size: 6778962
+  evaluate:
+    cmd: python3 code/evaluate.py
+    deps:
+    - path: code/evaluate.py
+      md5: 3faa8f7629215be2ce3ebfe73c837996
+      size: 814
+    - path: data/matrix-test.pkl
+      md5: dafc0eb8b3806252d6bfe4678e2b5204
+      size: 2272922
+    - path: data/model.pkl
+      md5: d3c804483850f1c3580b9d8d0ddf7550
+      size: 6778962
